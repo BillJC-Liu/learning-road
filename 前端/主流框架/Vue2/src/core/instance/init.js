@@ -69,6 +69,7 @@ export function initMixin(Vue: Class<Component>) {
     }
 
     // el 存在则调用$mount挂载节点
+    // 这里执行的是 runtime-with-compiler 中的$mount 方法
     if (vm.$options.el) {
       vm.$mount(vm.$options.el)
     }

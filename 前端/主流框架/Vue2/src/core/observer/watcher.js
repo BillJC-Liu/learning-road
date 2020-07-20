@@ -107,7 +107,7 @@ export default class Watcher {
     } catch (e) {
       if (this.user) {
         handleError(e, vm, `getter for watcher "${this.expression}"`)
-      } else {
+      } else { 
         throw e
       }
     } finally {

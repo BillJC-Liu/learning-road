@@ -52,6 +52,7 @@ Vue.prototype.$mount = function (
           }
         }
       } else if (template.nodeType) {
+        // 判断 template 是否是一个节点，是就取它的innerHTML
         template = template.innerHTML
       } else {
         if (process.env.NODE_ENV !== 'production') {
@@ -60,8 +61,8 @@ Vue.prototype.$mount = function (
         return this
       }
     } else if (el) {
-      // options 中不存在  template 属性 
-      // 调用 getOuterHTML 
+      // options 中不存在  template 属性
+      // 调用 getOuterHTML 取跟节点下的 HTMl 
       template = getOuterHTML(el)
     }
     if (template) {

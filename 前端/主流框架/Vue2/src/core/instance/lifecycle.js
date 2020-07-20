@@ -144,6 +144,7 @@ export function mountComponent(
   hydrating?: boolean  // 服务器渲染相关
 ): Component {
   vm.$el = el
+  // 如果你没有写render函数 且 前面的编译过程（将template编译成render）中没有render方法
   if (!vm.$options.render) {
     // 创建一个空的虚拟dom
     vm.$options.render = createEmptyVNode
@@ -166,6 +167,8 @@ export function mountComponent(
       }
     }
   }
+
+  // beforeMount生命周期
   callHook(vm, 'beforeMount')
 
   let updateComponent
@@ -203,7 +206,7 @@ export function mountComponent(
         callHook(vm, 'beforeUpdate')
       }
     }
-  }, true /* isRenderWatcher */)
+  }, true /* isRenderWatcher */)  // /* isRenderWatcher */  渲染 Watcher 与响应式原理强相关
   hydrating = false
  
   // manually mounted instance, call mounted on self
