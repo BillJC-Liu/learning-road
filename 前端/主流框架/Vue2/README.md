@@ -28,7 +28,7 @@ vue中对管理的状态进行了`getter/setter`的修改。
 
 ### Vue实例的实现，Vue.$mount做了些什么
 
- 
+
 ### Vue中的VNode
 
 ### Vue编译过程及原理
