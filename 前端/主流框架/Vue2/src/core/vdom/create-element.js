@@ -1,24 +1,13 @@
 /* @flow */
 
 import config from '../config'
-import VNode, { createEmptyVNode } from './vnode'
-import { createComponent } from './create-component'
 import { traverse } from '../observer/traverse'
+import { isDef, isObject, isPrimitive, isTrue, isUndef, resolveAsset, warn } from '../util/index'
+import { createComponent } from './create-component'
+import { normalizeChildren, simpleNormalizeChildren } from './helpers/index'
+import VNode, { createEmptyVNode } from './vnode'
 
-import {
-  warn,
-  isDef,
-  isUndef,
-  isTrue,
-  isObject,
-  isPrimitive,
-  resolveAsset
-} from '../util/index'
 
-import {
-  normalizeChildren,
-  simpleNormalizeChildren
-} from './helpers/index'
 
 const SIMPLE_NORMALIZE = 1
 const ALWAYS_NORMALIZE = 2
@@ -31,13 +20,16 @@ export function createElement (
   data: any,
   children: any,
   normalizationType: any,
-  alwaysNormalize: boolean
+  alwaysNormalize: boolean  // 总是正常的
 ): VNode | Array<VNode> {
+  // 判断 data 是数组 或者 是原始类型  string number symbol boolean
   if (Array.isArray(data) || isPrimitive(data)) {
     normalizationType = children
     children = data
     data = undefined
   }
+
+  // alwaysNormalize 存在 则  normalizationType = 2
   if (isTrue(alwaysNormalize)) {
     normalizationType = ALWAYS_NORMALIZE
   }
@@ -60,9 +52,12 @@ export function _createElement (
     return createEmptyVNode()
   }
   // object syntax in v-bind
+  // data 不等于 undefined & null 且data.is 存在
   if (isDef(data) && isDef(data.is)) {
     tag = data.is
   }
+
+  // 判断该标签是
   if (!tag) {
     // in case of component :is set to falsy value
     return createEmptyVNode()
