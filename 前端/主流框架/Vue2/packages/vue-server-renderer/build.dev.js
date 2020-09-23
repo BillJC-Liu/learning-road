@@ -338,9 +338,9 @@ function once (fn) {
 var isAttr = makeMap(
   'accept,accept-charset,accesskey,action,align,alt,async,autocomplete,' +
   'autofocus,autoplay,autosave,bgcolor,border,buffered,challenge,charset,' +
-  'checked,cite,class,code,codebase,color,cols,colspan,content,http-equiv,' +
-  'name,contenteditable,contextmenu,controls,coords,data,datetime,default,' +
-  'defer,dir,dirname,disabled,download,draggable,dropzone,enctype,method,for,' +
+  'checked,cite,class,code,codebase,color,cols,colspan,content,' +
+  'contenteditable,contextmenu,controls,coords,data,datetime,default,' +
+  'defer,dir,dirname,disabled,download,draggable,dropzone,enctype,for,' +
   'form,formaction,headers,height,hidden,high,href,hreflang,http-equiv,' +
   'icon,id,ismap,itemprop,keytype,kind,label,lang,language,list,loop,low,' +
   'manifest,max,maxlength,media,method,GET,POST,min,multiple,email,file,' +
@@ -348,7 +348,7 @@ var isAttr = makeMap(
   'preload,radiogroup,readonly,rel,required,reversed,rows,rowspan,sandbox,' +
   'scope,scoped,seamless,selected,shape,size,type,text,password,sizes,span,' +
   'spellcheck,src,srcdoc,srclang,srcset,start,step,style,summary,tabindex,' +
-  'target,title,type,usemap,value,width,wrap'
+  'target,title,usemap,value,width,wrap'
 );
 
 var unsafeAttrCharRE = /[>/="'\u0009\u000a\u000c\u0020]/; // eslint-disable-line no-control-regex
@@ -1197,6 +1197,7 @@ function defineReactive$$1 (
 ) {
   var dep = new Dep();
 
+  // 描述符
   var property = Object.getOwnPropertyDescriptor(obj, key);
   if (property && property.configurable === false) {
     return
@@ -1211,8 +1212,8 @@ function defineReactive$$1 (
 
   var childOb = !shallow && observe(val);
   Object.defineProperty(obj, key, {
-    enumerable: true,
-    configurable: true,
+    enumerable: true,  // 可枚举
+    configurable: true,  
     get: function reactiveGetter () {
       var value = getter ? getter.call(obj) : val;
       if (Dep.target) {
@@ -1259,6 +1260,7 @@ function set (target, key, val) {
   ) {
     warn(("Cannot set reactive property on undefined, null, or primitive value: " + ((target))));
   }
+
   if (Array.isArray(target) && isValidArrayIndex(key)) {
     target.length = Math.max(target.length, key);
     target.splice(key, 1, val);
@@ -1600,6 +1602,7 @@ function normalizeProps (options, vm) {
         : { type: val };
     }
   } else {
+    // 选项“props”的值无效：应为数组或对象，
     warn(
       "Invalid value for option \"props\": expected an Array or an Object, " +
       "but got " + (toRawType(props)) + ".",
@@ -6613,43 +6616,6 @@ function renderSSRStyle (
   }
 }
 
-/*  */
-
-var seenObjects = new _Set();
-
-/**
- * Recursively traverse an object to evoke all converted
- * getters, so that every nested property inside the object
- * is collected as a "deep" dependency.
- */
-function traverse (val) {
-  _traverse(val, seenObjects);
-  seenObjects.clear();
-}
-
-function _traverse (val, seen) {
-  var i, keys;
-  var isA = Array.isArray(val);
-  if ((!isA && !isObject(val)) || Object.isFrozen(val) || val instanceof VNode) {
-    return
-  }
-  if (val.__ob__) {
-    var depId = val.__ob__.dep.id;
-    if (seen.has(depId)) {
-      return
-    }
-    seen.add(depId);
-  }
-  if (isA) {
-    i = val.length;
-    while (i--) { _traverse(val[i], seen); }
-  } else {
-    keys = Object.keys(val);
-    i = keys.length;
-    while (i--) { _traverse(val[keys[i]], seen); }
-  }
-}
-
 {
   var perf = inBrowser && window.performance;
   /* istanbul ignore if */
@@ -6809,49 +6775,98 @@ function checkProp (
 
 /*  */
 
+var seenObjects = new _Set();
+
+/**
+ * Recursively traverse an object to evoke all converted
+ * getters, so that every nested property inside the object
+ * is collected as a "deep" dependency.
+ */
+function traverse (val) {
+  _traverse(val, seenObjects);
+  seenObjects.clear();
+}
+
+function _traverse (val, seen) {
+  var i, keys;
+  var isA = Array.isArray(val);
+  if ((!isA && !isObject(val)) || Object.isFrozen(val) || val instanceof VNode) {
+    return
+  }
+  if (val.__ob__) {
+    var depId = val.__ob__.dep.id;
+    if (seen.has(depId)) {
+      return
+    }
+    seen.add(depId);
+  }
+  if (isA) {
+    i = val.length;
+    while (i--) { _traverse(val[i], seen); }
+  } else {
+    keys = Object.keys(val);
+    i = keys.length;
+    while (i--) { _traverse(val[keys[i]], seen); }
+  }
+}
+
+/*  */
+
+
+
 var SIMPLE_NORMALIZE = 1;
 var ALWAYS_NORMALIZE = 2;
 
 // wrapper function for providing a more flexible interface
 // without getting yelled at by flow
-function createElement (
+function createElement(
   context,
   tag,
   data,
   children,
   normalizationType,
-  alwaysNormalize
+  alwaysNormalize  // 总是正常的
 ) {
+  // 判断 data 是数组 或者 是原始类型  string number symbol boolean
   if (Array.isArray(data) || isPrimitive(data)) {
     normalizationType = children;
     children = data;
     data = undefined;
   }
+
+  // alwaysNormalize 存在 则  normalizationType = 2
   if (isTrue(alwaysNormalize)) {
     normalizationType = ALWAYS_NORMALIZE;
   }
   return _createElement(context, tag, data, children, normalizationType)
 }
 
-function _createElement (
+function _createElement(
   context,
   tag,
   data,
   children,
   normalizationType
 ) {
+  // 检查data 是否是响应式数据 期望：data不能是响应式数据
   if (isDef(data) && isDef((data).__ob__)) {
     warn(
       "Avoid using observed data object as vnode data: " + (JSON.stringify(data)) + "\n" +
       'Always create fresh vnode data objects in each render!',
       context
     );
+
+    // data 是响应式数据 则提出警告并创建一个占位符vnode
     return createEmptyVNode()
   }
   // object syntax in v-bind
+  // data 不等于 undefined & null 且data.is 存在
+  // 检测data中是否有is属性，是的话 tag 代替is 指向的内容  处理动态组件
   if (isDef(data) && isDef(data.is)) {
     tag = data.is;
   }
+
+  // 判断该标签是否存在，不存在则创建占位符vnode
   if (!tag) {
     // in case of component :is set to falsy value
     return createEmptyVNode()
@@ -6875,12 +6890,20 @@ function _createElement (
     data.scopedSlots = { default: children[0] };
     children.length = 0;
   }
+
+  // ALWAYS_NORMALIZE = 2
+  // SIMPLE_NORMALIZE = 1
+  // 标准化处理children 的两种方式 将children 进行扁平化处理，
   if (normalizationType === ALWAYS_NORMALIZE) {
     children = normalizeChildren(children);
   } else if (normalizationType === SIMPLE_NORMALIZE) {
     children = simpleNormalizeChildren(children);
   }
   var vnode, ns;
+
+  // 判断tag是否是字符串，不是字符串直接创建 VNode 
+  // 是字符串，再判断是否是平台内建的标签（如：'div' 'span'），是的话直接创建VNode 
+  // 不是则直接创建该标签名的 VNode
   if (typeof tag === 'string') {
     var Ctor;
     ns = (context.$vnode && context.$vnode.ns) || config.getTagNamespace(tag);
@@ -6900,6 +6923,7 @@ function _createElement (
     // direct component options / constructor
     vnode = createComponent(tag, data, context, children);
   }
+
   if (Array.isArray(vnode)) {
     return vnode
   } else if (isDef(vnode)) {
@@ -6911,7 +6935,7 @@ function _createElement (
   }
 }
 
-function applyNS (vnode, ns, force) {
+function applyNS(vnode, ns, force) {
   vnode.ns = ns;
   if (vnode.tag === 'foreignObject') {
     // use default namespace inside foreignObject
@@ -6932,7 +6956,7 @@ function applyNS (vnode, ns, force) {
 // ref #5318
 // necessary to ensure parent re-render when deep bindings like :style and
 // :class are used on slot nodes
-function registerDeepBindings (data) {
+function registerDeepBindings(data) {
   if (isObject(data.style)) {
     traverse(data.style);
   }
@@ -7604,7 +7628,7 @@ function updateComponentListeners (
 
 var activeInstance = null;
 
-function updateChildComponent (
+function updateChildComponent(
   vm,
   propsData,
   listeners,
@@ -7677,14 +7701,14 @@ function updateChildComponent (
   }
 }
 
-function isInInactiveTree (vm) {
+function isInInactiveTree(vm) {
   while (vm && (vm = vm.$parent)) {
     if (vm._inactive) { return true }
   }
   return false
 }
 
-function activateChildComponent (vm, direct) {
+function activateChildComponent(vm, direct) {
   if (direct) {
     vm._directInactive = false;
     if (isInInactiveTree(vm)) {
@@ -7702,7 +7726,7 @@ function activateChildComponent (vm, direct) {
   }
 }
 
-function deactivateChildComponent (vm, direct) {
+function deactivateChildComponent(vm, direct) {
   if (direct) {
     vm._directInactive = true;
     if (isInInactiveTree(vm)) {
@@ -7718,10 +7742,11 @@ function deactivateChildComponent (vm, direct) {
   }
 }
 
-function callHook (vm, hook) {
+function callHook(vm, hook) {
   // #7573 disable dep collection when invoking lifecycle hooks
   pushTarget();
   var handlers = vm.$options[hook];
+  // beforeMount
   var info = hook + " hook";
   if (handlers) {
     for (var i = 0, j = handlers.length; i < j; i++) {
@@ -7814,10 +7839,11 @@ function resolveInject (inject, vm) {
 
 /*  */
 
-function resolveConstructorOptions (Ctor) {
+function resolveConstructorOptions(Ctor) {
   var options = Ctor.options;
-  if (Ctor.super) {
-    var superOptions = resolveConstructorOptions(Ctor.super);
+  // class继承中，子类必须在constructor方法中调用super方法，否则新建实例时会报错。
+  // 如果是继承的话，则会有super对象，super指向父类。
+  if (Ctor.super) {    var superOptions = resolveConstructorOptions(Ctor.super);
     var cachedSuperOptions = Ctor.superOptions;
     if (superOptions !== cachedSuperOptions) {
       // super option changed,
@@ -7838,7 +7864,7 @@ function resolveConstructorOptions (Ctor) {
   return options
 }
 
-function resolveModifiedOptions (Ctor) {
+function resolveModifiedOptions(Ctor) {
   var modified;
   var latest = Ctor.options;
   var sealed = Ctor.sealedOptions;

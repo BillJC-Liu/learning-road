@@ -1,20 +1,12 @@
 /* @flow */
 
-import {
-  warn,
-  remove,
-  isObject,
-  parsePath,
-  _Set as Set,
-  handleError,
-  noop
-} from '../util/index'
-
-import { traverse } from './traverse'
-import { queueWatcher } from './scheduler'
-import Dep, { pushTarget, popTarget } from './dep'
-
+import { handleError, isObject, noop, parsePath, remove, warn, _Set as Set } from '../util/index'
 import type { SimpleSet } from '../util/index'
+import Dep, { popTarget, pushTarget } from './dep'
+import { queueWatcher } from './scheduler'
+import { traverse } from './traverse'
+
+
 
 let uid = 0
 
@@ -47,7 +39,7 @@ export default class Watcher {
     expOrFn: string | Function,
     cb: Function,
     options?: ?Object,
-    isRenderWatcher?: boolean
+    isRenderWatcher?: boolean // 是否是渲染 wacher
   ) {
     this.vm = vm
     if (isRenderWatcher) {

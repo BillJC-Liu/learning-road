@@ -1276,6 +1276,7 @@
   ) {
     var dep = new Dep();
 
+    // 描述符
     var property = Object.getOwnPropertyDescriptor(obj, key);
     if (property && property.configurable === false) {
       return
@@ -1290,8 +1291,8 @@
 
     var childOb = !shallow && observe(val);
     Object.defineProperty(obj, key, {
-      enumerable: true,
-      configurable: true,
+      enumerable: true,  // 可枚举
+      configurable: true,  
       get: function reactiveGetter () {
         var value = getter ? getter.call(obj) : val;
         if (Dep.target) {
@@ -1338,6 +1339,7 @@
     ) {
       warn(("Cannot set reactive property on undefined, null, or primitive value: " + ((target))));
     }
+
     if (Array.isArray(target) && isValidArrayIndex(key)) {
       target.length = Math.max(target.length, key);
       target.splice(key, 1, val);
@@ -5213,9 +5215,9 @@
   var isAttr = makeMap(
     'accept,accept-charset,accesskey,action,align,alt,async,autocomplete,' +
     'autofocus,autoplay,autosave,bgcolor,border,buffered,challenge,charset,' +
-    'checked,cite,class,code,codebase,color,cols,colspan,content,http-equiv,' +
-    'name,contenteditable,contextmenu,controls,coords,data,datetime,default,' +
-    'defer,dir,dirname,disabled,download,draggable,dropzone,enctype,method,for,' +
+    'checked,cite,class,code,codebase,color,cols,colspan,content,' +
+    'contenteditable,contextmenu,controls,coords,data,datetime,default,' +
+    'defer,dir,dirname,disabled,download,draggable,dropzone,enctype,for,' +
     'form,formaction,headers,height,hidden,high,href,hreflang,http-equiv,' +
     'icon,id,ismap,itemprop,keytype,kind,label,lang,language,list,loop,low,' +
     'manifest,max,maxlength,media,method,GET,POST,min,multiple,email,file,' +
@@ -5223,7 +5225,7 @@
     'preload,radiogroup,readonly,rel,required,reversed,rows,rowspan,sandbox,' +
     'scope,scoped,seamless,selected,shape,size,type,text,password,sizes,span,' +
     'spellcheck,src,srcdoc,srclang,srcset,start,step,style,summary,tabindex,' +
-    'target,title,type,usemap,value,width,wrap'
+    'target,title,usemap,value,width,wrap'
   );
 
   /* istanbul ignore next */

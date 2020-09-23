@@ -1,20 +1,13 @@
 /* @flow */
 
-import {
-  warn,
-  nextTick,
-  emptyObject,
-  handleError,
-  defineReactive
-} from '../util/index'
-
-import { createElement } from '../vdom/create-element'
-import { installRenderHelpers } from './render-helpers/index'
-import { resolveSlots } from './render-helpers/resolve-slots'
+import { defineReactive, emptyObject, handleError, nextTick, warn } from '../util/index'
 import { normalizeScopedSlots } from '../vdom/helpers/normalize-scoped-slots'
 import VNode, { createEmptyVNode } from '../vdom/vnode'
-
 import { isUpdatingChildComponent } from './lifecycle'
+import { installRenderHelpers } from './render-helpers/index'
+import { resolveSlots } from './render-helpers/resolve-slots'
+
+
 
 export function initRender(vm: Component) {
   vm._vnode = null // the root of the child tree
@@ -61,6 +54,8 @@ export function renderMixin(Vue: Class<Component>) {
   Vue.prototype.$nextTick = function (fn: Function) {
     return nextTick(fn, this)
   }
+
+
 
   Vue.prototype._render = function (): VNode {
     const vm: Component = this
@@ -110,6 +105,7 @@ export function renderMixin(Vue: Class<Component>) {
     // return empty vnode in case the render function errored out
     if (!(vnode instanceof VNode)) {
       if (process.env.NODE_ENV !== 'production' && Array.isArray(vnode)) {
+        // 从呈现函数返回多个根节点。Render函数应该返回一个根节点。
         warn(
           'Multiple root nodes returned from render function. Render function ' +
           'should return a single root node.',
